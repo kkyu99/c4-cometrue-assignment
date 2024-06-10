@@ -5,12 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.c4marathon.assignment.accounts.entity.Account;
 import org.c4marathon.assignment.accounts.entity.AccountType;
 import org.c4marathon.assignment.accounts.service.AccountServiceImpl;
+import org.c4marathon.assignment.calculate.entity.CalculateId;
+import org.c4marathon.assignment.calculate.service.CalculateServiceImpl;
 import org.c4marathon.assignment.user.service.UserServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.c4marathon.assignment.user.entity.UserEntity;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -21,6 +24,29 @@ public class UserController {
 
     private final UserServiceImpl userService;
     private final AccountServiceImpl accountService;
+    private final CalculateServiceImpl calculateService;
+
+    @GetMapping("/send/cal")
+    public ResponseEntity<?> sendCalculate
+            (@RequestParam(name="calculateId") int calId,
+             @RequestParam(name="receiverId") String receiverId
+             ) throws Exception {
+        CalculateId calculateId = new CalculateId(calId,receiverId);
+        System.out.println(calculateId);
+        Account result = accountService.sendCalculate(calculateId);
+        return new ResponseEntity<Account>(result,HttpStatus.OK);
+    }
+
+    @GetMapping("/cal")
+    public ResponseEntity<?> requestCalculate
+            (@RequestParam(name="id") String id,
+             @RequestParam(name="targets") List<String> targets,
+             @RequestParam(name="amount") long amount,
+             @RequestParam(name="type") int type
+             ) {
+        int result = calculateService.requestCalculate(targets,id,amount,type);
+        return new ResponseEntity<Integer>(result,HttpStatus.OK);
+    }
 
     @PostMapping("/join")
     public ResponseEntity<?> save(@RequestBody UserEntity userEntity) {
