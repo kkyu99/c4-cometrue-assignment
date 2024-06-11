@@ -28,56 +28,63 @@ public class UserController {
 
     @GetMapping("/send/cal")
     public ResponseEntity<?> sendCalculate
-            (@RequestParam(name="calculateId") int calId,
-             @RequestParam(name="receiverId") String receiverId
-             ) throws Exception {
-        CalculateId calculateId = new CalculateId(calId,receiverId);
+            (@RequestParam(name = "calculateId") int calId,
+             @RequestParam(name = "receiverId") String receiverId
+            ) throws Exception {
+        CalculateId calculateId = new CalculateId(calId, receiverId);
         System.out.println(calculateId);
         Account result = accountService.sendCalculate(calculateId);
-        return new ResponseEntity<Account>(result,HttpStatus.OK);
+        return new ResponseEntity<Account>(result, HttpStatus.OK);
     }
 
     @GetMapping("/cal")
     public ResponseEntity<?> requestCalculate
-            (@RequestParam(name="id") String id,
-             @RequestParam(name="targets") List<String> targets,
-             @RequestParam(name="amount") long amount,
-             @RequestParam(name="type") int type
-             ) {
-        int result = calculateService.requestCalculate(targets,id,amount,type);
-        return new ResponseEntity<Integer>(result,HttpStatus.OK);
+            (@RequestParam(name = "id") String id,
+             @RequestParam(name = "targets") List<String> targets,
+             @RequestParam(name = "amount") long amount,
+             @RequestParam(name = "type") int type
+            ) {
+        int result = calculateService.requestCalculate(targets, id, amount, type);
+        return new ResponseEntity<Integer>(result, HttpStatus.OK);
     }
 
     @PostMapping("/join")
-    public ResponseEntity<?> save(@RequestBody UserEntity userEntity) {
+    public ResponseEntity<?> save(@RequestBody UserEntity userEntity) throws InterruptedException {
         System.out.println(userEntity);
         Account result = userService.join(userEntity);
-
-        return new ResponseEntity<Account>(result,HttpStatus.OK);
+        return new ResponseEntity<Account>(result, HttpStatus.OK);
     }
 
     @GetMapping("/add")
-    public ResponseEntity<?> addAcount(@RequestParam(name="id") String id, @RequestParam(name="type")AccountType type) {
+    public ResponseEntity<?> addAcount(@RequestParam(name = "id") String id, @RequestParam(name = "type") AccountType type) {
 
-        Account result = accountService.addAcount(id,type);
+        Account result = accountService.addAcount(id, type);
 
-        return new ResponseEntity<Account>(result,HttpStatus.OK);
+
+        return new ResponseEntity<Account>(result, HttpStatus.OK);
     }
 
+    //    @GetMapping("/charge")
+//    public ResponseEntity<?> chargeBalance(@RequestParam Map<String,String> map) throws Exception {
+//
+//        Account result = accountService.chargeBalance(map);
+//
+//
+//        return new ResponseEntity<Account>(result,HttpStatus.OK);
+//    }
     @GetMapping("/charge")
-    public ResponseEntity<?> chargeBalance(@RequestParam Map<String,String> map) throws Exception {
+    public void chargeBalance(@RequestParam Map<String, String> map) throws Exception {
 
         Account result = accountService.chargeBalance(map);
 
 
-        return new ResponseEntity<Account>(result,HttpStatus.OK);
     }
 
     @PostMapping("/send")
-    public ResponseEntity<?> send(@RequestParam Map<String,String> map) throws Exception {
+    public ResponseEntity<?> send(@RequestParam Map<String, String> map) throws Exception {
 
         Account result = accountService.transfer(map);
 
-        return new ResponseEntity<Account>(result,HttpStatus.OK);
+        return new ResponseEntity<Account>(result, HttpStatus.OK);
     }
 }
