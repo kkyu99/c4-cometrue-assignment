@@ -29,7 +29,7 @@ public class AccountServiceImpl {
     @Transactional
     public Account chargeBalance(Map<String, String> map) throws Exception {
 
-        Account account = accountRepository.findById(map.get("account"))
+        Account account = accountRepository.findByAccountWithLock(map.get("account"))
                 .orElseThrow(() -> new Exception("계좌없음"));
 
         account.setBalance(account.getBalance() + Integer.parseInt(map.get("amount")));
@@ -67,7 +67,7 @@ public class AccountServiceImpl {
 
         long amount = Long.parseLong(map.get("amount"));
 
-        Account sender = accountRepository.findById(map.get("sender"))
+        Account sender = accountRepository.findByAccountWithLock(map.get("sender"))
                 .orElseThrow(() -> new Exception("본인 계좌 없음"));
 
         if(sender.getBalance() < amount) {
@@ -78,7 +78,7 @@ public class AccountServiceImpl {
             throw new Exception("이체 한도 초과");
         }
 
-        Account receiver =  accountRepository.findById(map.get("receiver"))
+        Account receiver =  accountRepository.findByAccountWithLock(map.get("receiver"))
                 .orElseThrow(() -> new Exception("상대 계좌 없음"));
 
         sender.setBalance(sender.getBalance() - amount);

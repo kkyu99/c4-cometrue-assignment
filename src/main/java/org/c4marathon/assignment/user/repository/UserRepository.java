@@ -6,7 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 
 public interface UserRepository extends JpaRepository<UserEntity,Integer>{
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Override
-    <S extends UserEntity> S save(S entity);
+
 }
