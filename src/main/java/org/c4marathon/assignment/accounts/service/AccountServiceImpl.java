@@ -27,21 +27,27 @@ public class AccountServiceImpl {
     }
 
     @Transactional
-    public Account chargeBalance(Map<String, String> map) throws Exception {
+    public Account chargeBalance(Map<String, String> map) throws RuntimeException {
 
         Account account = accountRepository.findByAccountWithLock(map.get("account"))
-                .orElseThrow(() -> new Exception("계좌없음"));
+                .orElseThrow(() -> new RuntimeException("계좌없음"));
 
-        account.setBalance(account.getBalance() + Integer.parseInt(map.get("amount")));
+        int amount = Integer.parseInt(map.get("amount"));
 
+        if(account.getChargeLimit() < amount) {
+            throw new RuntimeException("충전 한도 초과");
+        }
+
+        account.setBalance(account.getBalance() + amount);
+        account.setChargeLimit(account.getChargeLimit() - amount);
         return account;
     }
 
     @Transactional
-    public Account sendCalculate(CalculateId calculateId) throws Exception {
+    public Account sendCalculate(CalculateId calculateId) throws RuntimeException {
 
         Calculates calculate = calculateRepository.findById(calculateId)
-                .orElseThrow(() -> new Exception("잘못된 접근"));
+                .orElseThrow(() -> new RuntimeException("잘못된 접근"));
 
         //내 계좌 찾기
         int sender = accountRepository.findMainAccountById(calculateId.getReceiverId()).getAccount();
@@ -57,32 +63,27 @@ public class AccountServiceImpl {
         if(result != null) {
             calculateRepository.delete(calculate);
         } else {
-            throw new Exception("정산 실패ㅜㅜ");
+            throw new RuntimeException("정산 실패ㅜㅜ");
         }
         return result;
     }
 
     @Transactional
-    public Account transfer(Map<String, String> map) throws Exception {
+    public Account transfer(Map<String, String> map) throws RuntimeException {
 
         long amount = Long.parseLong(map.get("amount"));
 
         Account sender = accountRepository.findByAccountWithLock(map.get("sender"))
-                .orElseThrow(() -> new Exception("본인 계좌 없음"));
+                .orElseThrow(() -> new RuntimeException("본인 계좌 없음"));
 
         if(sender.getBalance() < amount) {
-            throw new Exception("잔액 부족");
-        }
-
-        if(sender.getTransferLimit() < amount) {
-            throw new Exception("이체 한도 초과");
+            throw new RuntimeException("잔액 부족");
         }
 
         Account receiver =  accountRepository.findByAccountWithLock(map.get("receiver"))
-                .orElseThrow(() -> new Exception("상대 계좌 없음"));
+                .orElseThrow(() -> new RuntimeException("상대 계좌 없음"));
 
         sender.setBalance(sender.getBalance() - amount);
-        sender.setTransferLimit(sender.getTransferLimit() - amount);
         receiver.setBalance(receiver.getBalance() + amount);
 
         return receiver;

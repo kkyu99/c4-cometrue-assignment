@@ -24,10 +24,10 @@ public class Scheduler {
     @Async
     @Transactional
     public void setTransferLimit() {
-        final long TRANSFER_LIMIT = 3000000L;
+        final long CHARGE_LIMIT = 3000000L;
         List<Account> accounts = accountRepository.findAll();
         for(Account account : accounts) {
-            account.setTransferLimit(TRANSFER_LIMIT);
+            account.setChargeLimit(CHARGE_LIMIT);
         }
         log.info("transferLimit updated");
     }

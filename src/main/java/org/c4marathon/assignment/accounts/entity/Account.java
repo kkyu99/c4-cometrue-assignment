@@ -18,7 +18,7 @@ public class Account {
 
     private String id;
     private long balance;
-    private long transferLimit;
+    private long chargeLimit;
     @Enumerated(EnumType.ORDINAL)
     private AccountType accountType;
 }
