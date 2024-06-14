@@ -7,6 +7,7 @@ import org.c4marathon.assignment.accounts.entity.AccountType;
 import org.c4marathon.assignment.accounts.service.AccountServiceImpl;
 import org.c4marathon.assignment.calculate.entity.CalculateId;
 import org.c4marathon.assignment.calculate.service.CalculateServiceImpl;
+import org.c4marathon.assignment.transfer.entity.Transfer;
 import org.c4marathon.assignment.user.service.UserServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +29,13 @@ public class UserController {
 
     @GetMapping("/send/cal")
     public ResponseEntity<?> sendCalculate
-            (@RequestParam(name = "calculateId") int calId,
+            (@RequestParam(name = "calculateId") Long calId,
              @RequestParam(name = "receiverId") String receiverId
             ) throws Exception {
         CalculateId calculateId = new CalculateId(calId, receiverId);
         System.out.println(calculateId);
-        Account result = accountService.sendCalculate(calculateId);
-        return new ResponseEntity<Account>(result, HttpStatus.OK);
+        Transfer result = accountService.sendCalculate(calculateId);
+        return new ResponseEntity<Integer>(1, HttpStatus.OK);
     }
 
     @GetMapping("/cal")
@@ -83,8 +84,8 @@ public class UserController {
     @PostMapping("/send")
     public ResponseEntity<?> send(@RequestParam Map<String, String> map) throws Exception {
 
-        Account result = accountService.transfer(map);
+        Transfer result = accountService.transfer(map);
 
-        return new ResponseEntity<Account>(result, HttpStatus.OK);
+        return new ResponseEntity<Transfer>(result, HttpStatus.OK);
     }
 }

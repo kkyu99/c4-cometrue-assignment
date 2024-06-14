@@ -21,7 +21,7 @@ public interface AccountRepository extends JpaRepository<Account,String> {
     List<Account> findAll();
 
     @Lock(LockModeType.PESSIMISTIC_READ)
-    @Query(value="SELECT a FROM Account a where a.id = :userId and a.accountType=0")
+    @Query(value="SELECT a FROM Account a where a.user.userId = :userId and a.accountType=0")
     Account findMainAccountById(@Param("userId") String id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

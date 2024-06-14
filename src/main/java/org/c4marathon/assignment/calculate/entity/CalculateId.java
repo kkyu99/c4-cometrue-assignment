@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Data
 public class CalculateId implements Serializable {
 
-    private int calculateId;
+    private Long calculateId;
 
     private String receiverId;
 }

@@ -16,8 +16,14 @@ public class UserServiceImpl {
     private final AccountRepository accountRepository;
     @Transactional
     public Account join(UserEntity userEntity) {
+        final Long CHARGE_LIMIT = 3000000L;
         userRepository.save(userEntity);
-        Account account = new Account(0,userEntity.getId(),100,3000000, AccountType.MAIN);
+        Account account = Account.builder()
+                .user(userEntity)
+                .balance(0L)
+                .chargeLimit(CHARGE_LIMIT)
+                .accountType(AccountType.MAIN)
+                .build();
         return accountRepository.save(account);
     }
 }
