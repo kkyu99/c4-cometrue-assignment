@@ -27,8 +27,8 @@ public class TransferController {
     public ResponseEntity acceptTransfer(
             @RequestParam Map<String,String> map
             ) {
-        Account result = transferService.acceptTransfer(map);
-        return new ResponseEntity<Account>(result, HttpStatus.OK);
+        int result = transferService.acceptTransfer(map);
+        return new ResponseEntity<Integer>(result, HttpStatus.OK);
     }
 
     @GetMapping("/cancel")

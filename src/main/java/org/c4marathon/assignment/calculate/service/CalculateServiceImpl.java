@@ -32,6 +32,7 @@ public class CalculateServiceImpl {
         long totalAmount = amount;
         long afterCalculate = 0;
         long calculatedAmount = 0;
+        long additionalDeal = 0;
         if (type == 0) {
             calculatedAmount = totalAmount / (target.size() + 1);
             afterCalculate += calculatedAmount;
@@ -48,18 +49,11 @@ public class CalculateServiceImpl {
                 calculateRepository.save(calculates);
             }
             //빈 금액만큼 추가해줘
-            long additionalDeal = amount - afterCalculate;
-            UserEntity targetUser = UserEntity.builder().userId(id).build();
-            Calculates calculates = Calculates.builder()
-                    .calculateId(lastId)
-                    .receiverId(targetUser)
-                    .targetAccount(account)
-                    .amount(additionalDeal)
-                    .build();
-            calculateRepository.save(calculates);
+            additionalDeal = amount - afterCalculate;
+
         } else {
             for (String targetId : target) {
-                int rand = (int) (Math.random() * 10);
+                int rand = (int) (Math.random() * 10 + 1);
                 calculatedAmount = amount / rand;
                 if (totalAmount < calculatedAmount) {
                     continue;
@@ -76,7 +70,14 @@ public class CalculateServiceImpl {
                 calculateRepository.save(calculates);
             }
         }
-
+        UserEntity targetUser = UserEntity.builder().userId(id).build();
+        Calculates calculates = Calculates.builder()
+                .calculateId(lastId)
+                .receiverId(targetUser)
+                .targetAccount(account)
+                .amount(additionalDeal)
+                .build();
+        calculateRepository.save(calculates);
         return 1;
     }
 
