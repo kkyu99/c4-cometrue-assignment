@@ -61,9 +61,6 @@ public class AccountServiceImpl {
                 .orElseThrow(() -> new RuntimeException("잘못된 접근"));
         //내 계좌 찾기
         Long sender = accountRepository.findMainAccountById(calculateId.getReceiverId()).getAccount();
-        System.out.println(calculate);
-        System.out.println(sender);
-
         //이미 보냈으면 취소
         if (transferRepository.findBySenderAccountAndCalculateId(sender, calculateId.getCalculateId()).size() != 0) {
             throw new RuntimeException("이미 정산 중...");

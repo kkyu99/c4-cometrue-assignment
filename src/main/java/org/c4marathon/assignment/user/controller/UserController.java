@@ -27,27 +27,6 @@ public class UserController {
     private final AccountServiceImpl accountService;
     private final CalculateServiceImpl calculateService;
 
-    @GetMapping("/send/cal")
-    public ResponseEntity<?> sendCalculate
-            (@RequestParam(name = "calculateId") Long calId,
-             @RequestParam(name = "receiverId") String receiverId
-            ) throws Exception {
-        CalculateId calculateId = new CalculateId(calId, receiverId);
-        System.out.println(calculateId);
-        Transfer result = accountService.sendCalculate(calculateId);
-        return new ResponseEntity<Integer>(1, HttpStatus.OK);
-    }
-
-    @GetMapping("/cal")
-    public ResponseEntity<?> requestCalculate
-            (@RequestParam(name = "id") String id,
-             @RequestParam(name = "targets") List<String> targets,
-             @RequestParam(name = "amount") long amount,
-             @RequestParam(name = "type") int type
-            ) {
-        int result = calculateService.requestCalculate(targets, id, amount, type);
-        return new ResponseEntity<Integer>(result, HttpStatus.OK);
-    }
 
     @PostMapping("/join")
     public ResponseEntity<?> save(@RequestBody UserEntity userEntity) throws InterruptedException {
@@ -56,14 +35,6 @@ public class UserController {
         return new ResponseEntity<Account>(result, HttpStatus.OK);
     }
 
-    @GetMapping("/add")
-    public ResponseEntity<?> addAcount(@RequestParam(name = "id") String id, @RequestParam(name = "type") AccountType type) {
-
-        Account result = accountService.addAcount(id, type);
-
-
-        return new ResponseEntity<Account>(result, HttpStatus.OK);
-    }
 
     //    @GetMapping("/charge")
 //    public ResponseEntity<?> chargeBalance(@RequestParam Map<String,String> map) throws Exception {
@@ -73,19 +44,5 @@ public class UserController {
 //
 //        return new ResponseEntity<Account>(result,HttpStatus.OK);
 //    }
-    @GetMapping("/charge")
-    public void chargeBalance(@RequestParam Map<String, String> map) throws Exception {
 
-        Account result = accountService.chargeBalance(map);
-
-
-    }
-
-    @PostMapping("/send")
-    public ResponseEntity<?> send(@RequestParam Map<String, String> map) throws Exception {
-
-        Transfer result = accountService.transfer(map);
-
-        return new ResponseEntity<Transfer>(result, HttpStatus.OK);
-    }
 }
