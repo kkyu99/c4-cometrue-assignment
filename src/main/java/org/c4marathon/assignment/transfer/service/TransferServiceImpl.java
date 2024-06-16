@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.c4marathon.assignment.accounts.entity.Account;
 import org.c4marathon.assignment.calculate.entity.Calculates;
 import org.c4marathon.assignment.calculate.repository.CalculateRepository;
+import org.c4marathon.assignment.information.entity.Informations;
+import org.c4marathon.assignment.information.repository.InformationsRepository;
 import org.c4marathon.assignment.transfer.entity.Transfer;
 import org.c4marathon.assignment.transfer.repository.TransferRepository;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class TransferServiceImpl {
 
     private final TransferRepository transferRepository;
     private final CalculateRepository calculateRepository;
+    private final InformationsRepository informationsRepository;
     @Transactional
     public int acceptTransfer(Map<String, String> map) throws RuntimeException{
         //userId, transferid 확인
@@ -30,12 +33,14 @@ public class TransferServiceImpl {
         //transfer과 id 일치하는지 확인
         Transfer transfer = transferRepository.findByIdWithLock(transferId)
                 .orElseThrow(() -> new RuntimeException("해당 송금 내역 없음"));
+        Long amount = transfer.getAmount();
         Account receiver = transfer.getReceiver();
         if(isEquals(userId, receiver)) {
             //transfer지우고, 내계좌 증가
-            receiver.updateBalance(receiver.getBalance() + transfer.getAmount());
+            receiver.updateBalance(receiver.getBalance() + amount);
             log.info(receiver.getUser().getUserId());
             transferRepository.delete(transfer);
+            saveInformation(receiver, amount,transfer.getSender(), transfer.getNickName(), receiver);
         }
 
         if(transfer.getCalculateId() != null) {
@@ -60,7 +65,9 @@ public class TransferServiceImpl {
         if(calculates.size() == 1) {
             Calculates calculate = calculates.get(0);
             Account account = calculate.getTargetAccount();
-            account.updateBalance(account.getBalance() + calculate.getAmount());
+            Long amount = calculate.getAmount();
+            account.updateBalance(account.getBalance() + amount);
+            saveInformation(account, amount,null, "회사", account);
             calculateRepository.delete(calculate);
         }
     }
@@ -97,6 +104,18 @@ public class TransferServiceImpl {
 
     private static boolean isEquals(String userId, Account userAccount) {
         return userAccount.getUser().getUserId().equals(userId);
+    }
+
+    @Transactional
+    public void saveInformation(Account owner, long amount, Account sender, String nickName, Account receiver) {
+        Informations information = Informations.builder()
+                .owner(owner)
+                .sender(sender)
+                .receiver(receiver)
+                .amount(amount)
+                .nickName(nickName).build();
+
+        informationsRepository.save(information);
     }
 
 

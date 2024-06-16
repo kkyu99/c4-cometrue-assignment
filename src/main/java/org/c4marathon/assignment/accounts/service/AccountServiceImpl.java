@@ -2,13 +2,14 @@ package org.c4marathon.assignment.accounts.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.c4marathon.assignment.accounts.entity.Account;
 import org.c4marathon.assignment.accounts.entity.AccountType;
 import org.c4marathon.assignment.accounts.repository.AccountRepository;
 import org.c4marathon.assignment.calculate.entity.CalculateId;
 import org.c4marathon.assignment.calculate.entity.Calculates;
 import org.c4marathon.assignment.calculate.repository.CalculateRepository;
+import org.c4marathon.assignment.information.entity.Informations;
+import org.c4marathon.assignment.information.repository.InformationsRepository;
 import org.c4marathon.assignment.transfer.entity.Transfer;
 import org.c4marathon.assignment.transfer.repository.TransferRepository;
 import org.c4marathon.assignment.user.entity.UserEntity;
@@ -25,6 +26,7 @@ public class AccountServiceImpl {
     private final AccountRepository accountRepository;
     private final CalculateRepository calculateRepository;
     private final TransferRepository transferRepository;
+    private final InformationsRepository informationsRepository;
 
     public Account addAcount(String id, AccountType type) {
         final Long CHARGE_LIMIT = 3000000L;
@@ -50,12 +52,12 @@ public class AccountServiceImpl {
         account.updateBalance(account.getBalance() + amount);
         account.updateChargeLimit(account.getChargeLimit() - amount);
 
+        saveInformation(account,amount,account,"나",account);
+
         return account;
     }
 
     @Transactional
-
-
     public Transfer sendCalculate(CalculateId calculateId) throws RuntimeException {
         Calculates calculate = calculateRepository.findById(calculateId)
                 .orElseThrow(() -> new RuntimeException("잘못된 접근"));
@@ -71,33 +73,64 @@ public class AccountServiceImpl {
         map.put("sender", String.valueOf(sender));
         map.put("receiver", String.valueOf(calculate.getTargetAccount().getAccount()));
         map.put("calculateId", String.valueOf(calculateId.getCalculateId()));
-        Transfer result = transfer(map);
 
-        return result;
+        return transfer(map);
     }
 
     @Transactional
     public Transfer transfer(Map<String, String> map) throws RuntimeException {
 
         long amount = Long.parseLong(map.get("amount"));
-
         Account sender = accountRepository.findByAccountWithLock(map.get("sender"))
                 .orElseThrow(() -> new RuntimeException("본인 계좌 없음"));
 
         if (sender.getBalance() < amount) {
             throw new RuntimeException("잔액 부족");
         }
+        String nickName = setNickName(map, sender);
         Account receiver = accountRepository.findByAccountWithLock(map.get("receiver"))
                 .orElseThrow(() -> new RuntimeException("상대 계좌 없음"));
         sender.updateBalance(sender.getBalance() - amount);
+        Long calculateId = null;
+        if (map.containsKey("calculateId")) {
+            calculateId = Long.parseLong(map.get("calculateId"));
+        }
+        return saveTransfer(calculateId, amount, sender, nickName, receiver);
+    }
+
+    @Transactional
+    public Transfer saveTransfer(Long calculateId, long amount, Account sender, String nickName, Account receiver) {
         Transfer transfer = Transfer.builder()
                 .sender(sender)
                 .receiver(receiver)
-                .amount(amount).build();
-        if (map.containsKey("calculateId")) {
-            transfer.setCalculateId(Long.parseLong(map.get("calculateId")));
+                .amount(amount)
+                .nickName(nickName).build();
+        if(calculateId != null) {
+            transfer.setCalculateId(calculateId);
         }
         transferRepository.save(transfer);
+        saveInformation(sender, amount, sender, nickName, receiver);
         return transfer;
+    }
+
+    @Transactional
+    public void saveInformation(Account owner, long amount, Account sender, String nickName, Account receiver) {
+        Informations information = Informations.builder()
+                .owner(owner)
+                .sender(sender)
+                .receiver(receiver)
+                .amount(amount)
+                .nickName(nickName).build();
+
+        informationsRepository.save(information);
+    }
+
+
+    private static String setNickName(Map<String, String> map, Account sender) {
+        String nickName = sender.getUser().getUserId();
+        if(map.containsKey("nickName")) {
+            nickName = map.get("nickName");
+        }
+        return nickName;
     }
 }

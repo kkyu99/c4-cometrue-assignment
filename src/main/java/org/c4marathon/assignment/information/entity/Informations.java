@@ -1,23 +1,27 @@
-package org.c4marathon.assignment.transfer.entity;
+package org.c4marathon.assignment.information.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.c4marathon.assignment.accounts.entity.Account;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="transfers")
+@Table(name="informations")
 @Getter
 @NoArgsConstructor
-@ToString
-public class Transfer {
+public class Informations {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name= "owner_id")
+    private Account owner;
 
     @ManyToOne
     @JoinColumn(name = "sender_account_id")
@@ -26,22 +30,19 @@ public class Transfer {
     @ManyToOne
     @JoinColumn(name = "receiver_account_id")
     private Account receiver;
-    private Long amount;
+
     private String nickName;
+    private Long amount;
     @CreationTimestamp
     private LocalDateTime date;
 
-    @Nullable
-    private Long calculateId;
+
     @Builder
-    public Transfer(Account sender, Account receiver, Long amount, String nickName) {
+    public Informations(Account owner,Account sender, Account receiver, String nickName, Long amount) {
+        this.owner = owner;
         this.sender = sender;
         this.receiver = receiver;
         this.nickName = nickName;
         this.amount = amount;
-    }
-
-    public void setCalculateId(Long calculateId) {
-        this.calculateId = calculateId;
     }
 }

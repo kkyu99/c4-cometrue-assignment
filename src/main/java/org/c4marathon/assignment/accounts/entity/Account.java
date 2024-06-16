@@ -2,6 +2,7 @@ package org.c4marathon.assignment.accounts.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.c4marathon.assignment.information.entity.Informations;
 import org.c4marathon.assignment.transfer.entity.Transfer;
 import org.c4marathon.assignment.user.entity.UserEntity;
 
@@ -10,9 +11,7 @@ import java.util.List;
 @Entity
 @Table(name="accounts")
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Account {
 
     @Id
@@ -33,6 +32,15 @@ public class Account {
 
     @OneToMany(mappedBy = "receiver")
     private List<Transfer> receivedTransfers;
+
+    @OneToMany(mappedBy = "sender")
+    private List<Informations> sentInformations;
+
+    @OneToMany(mappedBy = "receiver")
+    private List<Informations> receivedInformations;
+
+    @OneToMany(mappedBy = "owner")
+    private List<Informations> ownerInformations;
 
     @Builder
     public Account(UserEntity user, Long balance, Long chargeLimit, AccountType accountType) {
