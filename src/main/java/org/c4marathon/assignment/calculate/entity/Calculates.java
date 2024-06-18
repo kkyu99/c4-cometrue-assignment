@@ -29,7 +29,6 @@ public class Calculates {
     @CreationTimestamp
     private LocalDateTime date;
 
-
     @Builder
     public Calculates(Long calculateId, UserEntity receiverId, Account targetAccount, Long amount, LocalDateTime date) {
         this.calculateId = calculateId;
