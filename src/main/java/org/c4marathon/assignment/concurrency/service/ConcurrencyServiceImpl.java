@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.c4marathon.assignment.accounts.entity.Account;
 import org.c4marathon.assignment.accounts.repository.AccountRepository;
+import org.c4marathon.assignment.redisson.RedissonLock;
 import org.c4marathon.assignment.transfer.entity.Transfer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -40,5 +41,23 @@ public class ConcurrencyServiceImpl {
         receiver.updateBalance(receiver.getBalance() + amount);
     }
 
+    @RedissonLock(value="#id")
+    public void transfer2(Map<String, String> map, String id) throws RuntimeException{
+
+        long amount = Long.parseLong(map.get("amount"));
+
+        Account sender = accountRepository.findById(map.get("sender"))
+                .orElseThrow(() -> new RuntimeException("본인 계좌 없음"));
+
+        if (sender.getBalance() < amount) {
+            throw new RuntimeException("잔액 부족");
+        }
+
+        Account receiver = accountRepository.findById(map.get("receiver"))
+                .orElseThrow(() -> new RuntimeException("상대 계좌 없음"));
+
+        sender.updateBalance(sender.getBalance() - amount);
+        receiver.updateBalance(receiver.getBalance() + amount);
+    }
 
 }

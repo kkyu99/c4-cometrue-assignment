@@ -19,9 +19,10 @@ public class ConcurrencyController {
 
 
     @GetMapping ("/send")
-    public ResponseEntity<?> send(@RequestParam Map<String, String> map) throws Exception {
+    public ResponseEntity<?> send(@RequestParam Map<String, String> map, @RequestParam(name="sender") String id) throws Exception {
 
-        concurrencyService.transfer(map);
+        //concurrencyService.transfer(map);
+        concurrencyService.transfer2(map,id);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
